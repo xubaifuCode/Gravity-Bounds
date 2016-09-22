@@ -17,50 +17,57 @@ function startGame() {
 		game_area.removeChild(mySlid.obj);
 		game_area.removeChild(myBound.obj);
 	}
-
+	$("show_welcome").style.display = "none";
 	maxBoxNum = 70;
 	generateMap();
-
-	$("menu").style.display = "none";
 	isStart = true;
-	directX = directY = -3;
+	directX = directY = -2;
+
 	game_area = $("game_area");
 	myBound = new Ball();
 	mySlid = new Slid();
 	game_area.appendChild(myBound.obj);
 	game_area.appendChild(mySlid.obj);
+
 	leftEdge = game_area.offsetLeft;
 	rightEdge = leftEdge + game_area.offsetWidth;
 	topEdge = 140;
-	var tLeftP = leftEdge + parseInt((Math.random() * game_area.offsetWidth));
-	tLeftP = tLeftP > rightEdge - 82 ? tLeftP - 82 : tLeftP;
+
+	//Generated the position of slid and ball.
+	var tLeftP = 0;
+	while(tLeftP < leftEdge || tLeftP > (rightEdge - 100)) {
+		tLeftP = leftEdge + Math.floor(Math.random() * game_area.offsetWidth);
+	}
+
 	mySlid.toPosition(tLeftP, 320);
 	myBound.toPosition(tLeftP, 300);
+	
 	bottomEdge = mySlid.getTop();
+
+	//Start to move
 	moveBoundInterval = setInterval("boundMove()", 30);
 	moveSlidInterval = setInterval("slidMove()", 5);
 }
 
 function boundMove() {
 	myBound.toPosition(myBound.getLeft() + directX, myBound.getTop() + directY);
+
 	if (!resetDirect(myBound.getLeft(), myBound.getTop())) {
 		clearInterval(moveBoundInterval);
 		clearInterval(moveSlidInterval);
-		$("menu").style.display = "block";
+		$("show_welcome").style.display = "block";
+		$("menu").innerHTML = "again"
+		$("box_area").innerHTML = "";
 		console.log("Game over.");
 	}
 }
 
 function generateMap() {
-	//bricks = new Array();
 	var box_area = $("box_area");
-	var idStr;
 	var tObj;
 	for (var i = 1; i <= maxBoxNum; i++) {
-		idStr = "box_" + i;
-		tObj = new Brick(idStr);
+		tObj = new Brick("box_" + i);
 		box_area.appendChild(tObj.obj);
-		//bricks.push(tObj);
 	}
 }
 
