@@ -1,60 +1,99 @@
 var moveBoundInterval, moveSlidInterval;
 var isStart;
-//recording when key was pressed.
 var left, right;
-//The edges
-var leftEdge, rightEdge, topEdge, bottomEdge, minCrashEdge;
-//use it to decide direction
-var directX, directY;
-var myBound, mySlid, game_area;
+var minCrashEdge;
+var directX = -2, directY = -2;
+var myBound, mySlid, myGameArea;
 var maxBoxNum;
+var MAX;
+var speed = 10;
+var moveDis = 4;
+var wid = 81, hei = 17;
+var score;
+
 function $(elemId) {
 	return document.getElementById(elemId);
 }
 
 function startGame() {
 	if ($("slid")) {
-		game_area.removeChild(mySlid.obj);
-		game_area.removeChild(myBound.obj);
+		mySlid.obj.remove();
+		myBound.obj.remove();
 	}
-	$("show_something").style.display = "none";
-	maxBoxNum = 1;
-	generateMap();
-	isStart = true;
-	directX = directY = -1;
 
-	game_area = $("game_area");
+	speed = 10;
+	score = 0;
+	MAX = maxBoxNum = 10;
+	isStart = true;
+	$("show_something").style.display = "none";
+	$("surplus").innerHTML = "surplus: " + maxBoxNum;
+	$("speed").innerHTML = "speed: " + speed;
+	$("score").innerHTML = "score: " + score;
+
+	myGameArea = new GameArea();
 	myBound = new Ball();
 	mySlid = new Slid();
-	game_area.appendChild(myBound.obj);
-	game_area.appendChild(mySlid.obj);
-
-	leftEdge = game_area.offsetLeft;
-	rightEdge = leftEdge + game_area.offsetWidth;
-	topEdge = game_area.offsetTop;
-	minCrashEdge = (maxBoxNum / 10 + 1) * 15 + topEdge;
-	console.log(minCrashEdge);
+	myGameArea.obj.appendChild(myBound.obj);
+	myGameArea.obj.appendChild(mySlid.obj);
+	minCrashEdge = Math.ceil(maxBoxNum / 10) * 15 + myGameArea.getTop();
+	generateMap();
 
 	//Generated the position of slid and ball.
-	var tLeftP = 0;
-	while(tLeftP < leftEdge || tLeftP > (rightEdge - 100)) {
-		tLeftP = leftEdge + Math.floor(Math.random() * 666);
+	var slidPosition = 0;
+	while(slidPosition < myGameArea.getLeft() || slidPosition > myGameArea.getRight() - mySlid.getWidth()) {
+		slidPosition = myGameArea.getLeft() + Math.floor(Math.random() * 666);
 	}
-
-	mySlid.toPosition(tLeftP, 320);
-	myBound.toPosition(tLeftP, 300);
-	
-	bottomEdge = mySlid.getTop();
+	mySlid.toPosition(slidPosition, 320);
+	myBound.toPosition(slidPosition, 300);
 
 	//Start to move
-	moveBoundInterval = setInterval("boundMove()", 5);
-	moveSlidInterval = setInterval("slidMove()", 5);
+	moveBoundInterval = setInterval("boundMove()", speed);
+	moveSlidInterval = setInterval("slidMove()", speed);
+}
+
+function slidMove() {
+	if (left) {
+		var leftEdge = myGameArea.getLeft();
+		var p = mySlid.getLeft() - moveDis;
+		p = p  < leftEdge ? leftEdge : p;
+		mySlid.horizontalMove(p);
+	} else if (right) {
+		var rightEdge = myGameArea.getRight();
+		var p = mySlid.getRight() + moveDis;
+		p = p > rightEdge ? rightEdge - mySlid.getWidth() : mySlid.getLeft() + moveDis;
+		mySlid.horizontalMove(p);
+	}
+}
+
+window.onkeydown = function() {
+	var e = e || event;
+       	var keyCode=e.keyCode||e.which||e.charCode;
+	switch(keyCode) {
+		case 37:
+			left = true && isStart;
+			break;
+		case 39:
+			right = true && isStart;
+			break;
+	}
+}
+
+window.onkeyup = function() {
+	var e = e || event;
+       	var keyCode=e.keyCode||e.which||e.charCode;
+	switch(keyCode) {
+		case 37:
+			left = false;
+			break;
+		case 39:
+			right = false;
+			break;
+	}
 }
 
 function boundMove() {
 	myBound.toPosition(myBound.getLeft() + directX, myBound.getTop() + directY);
-
-	if (!resetDirect(myBound.getLeft(), myBound.getTop())) {
+	if (!resetDirect()) {
 		$("hint_info").innerHTML = "Game Over"
 		console.log("Game over.");
 	} else if (maxBoxNum == 0) {
@@ -70,6 +109,62 @@ function boundMove() {
 	$("box_area").innerHTML = "";
 }
 
+function resetDirect() {
+	var bLeft = myBound.getLeft();
+	var bRight = myBound.getRight();
+	var bTop = myBound.getTop();
+	var bBottom = myBound.getBottom();
+
+	if (bLeft < myGameArea.getLeft() || bRight > myGameArea.getRight()) {
+		directX *= -1;
+	}
+
+	if (bTop < myGameArea.getTop() || (bTop < minCrashEdge && isCrash())) {
+		directY *= -1;
+	} else if (bBottom> mySlid.getTop() && bRight >= mySlid.getLeft() && bLeft <= mySlid.getRight()) {
+		directY *= -1;
+	} else if (bBottom > mySlid.getTop()) {
+		return false;
+	}
+	
+	return true;
+}
+
+function isCrash() {
+	var bTop = myBound.getTop() - myGameArea.getTop();
+	var bBottom = bTop + myBound.getHeight();
+	var bLeft = myBound.getLeft()  - myGameArea.getLeft();
+	var bRight = bLeft + myBound.getWidth();
+
+	var row = directY < 0 ? Math.ceil(bTop/ hei) - 1 : Math.ceil(bBottom / hei)  - 2;
+	row = row < 0 ? 0 : row;
+	var col = directX < 0 ? Math.ceil(bLeft / wid) : Math.ceil(bRight / wid);
+
+	var position ="box_" + (row * 10 + col);
+	var box = $(position);
+	if (box != null && box.style.visibility != "hidden") {
+		box.style.visibility = "hidden";
+		maxBoxNum--;
+		if (maxBoxNum % 5 == 0) {
+			resetSpeed();
+		}
+		$("surplus").innerHTML = "surplus: " + maxBoxNum;
+		score += (MAX - maxBoxNum) * 10 + Math.pow(5, 10 - speed);
+		$("score").innerHTML = "score: " + score;
+		return true;
+	}
+	return false;
+}
+
+function resetSpeed() {
+	speed--;
+	$("speed").innerHTML = "speed: " + speed;
+	clearInterval(moveBoundInterval);
+	clearInterval(moveSlidInterval);
+	moveBoundInterval = setInterval("boundMove()", speed);
+	moveSlidInterval = setInterval("slidMove()", speed);
+}
+
 function generateMap() {
 	var box_area = $("box_area");
 	var tObj;
@@ -79,72 +174,27 @@ function generateMap() {
 	}
 }
 
-
-
-function slidMove() {
-	if (left) {
-		var p = slid.offsetLeft - 3;
-		p = p  < leftEdge ? leftEdge : p;
-		mySlid.horizontalMove(p);
-	} else if (right) {
-		var p = slid.offsetLeft + 3;
-		p = p + mySlid.getWidth() > rightEdge ? rightEdge - mySlid.getWidth() : p;
-		mySlid.horizontalMove(p);
-	}
-}
-
-function resetDirect(mX, mY) {
-	if (mX < leftEdge || mX + myBound.getWidth() > rightEdge) {
-		directX *= -1;
-	}
-
-	if (mY < topEdge || (mY < minCrashEdge && isCrash())) {
-		directY *= -1;
-	} else if (mY + myBound.getHeight() > bottomEdge && mX + myBound.getWidth() >= mySlid.getLeft() && mX <= mySlid.getRight()) {
-		directY *= -1;
-	} else if (mY + myBound.getHeight() > bottomEdge) {
-		return false;
-	}
-	
-	return true;
-}
-
-function isCrash() {
-	var bTop = myBound.getTop() - topEdge;
-	var bBottom = myBound.getBottom() -topEdge;
-	var bLeft = myBound.getLeft()  - game_area.offsetLeft;
-	var bRight = bLeft + myBound.getWidth();
-
-	var row = directY < 0 ? Math.floor(bTop/ 17) - 1 : Math.floor(bBottom / 17)  - 2;
-	var col = directX < 0 ? Math.ceil(bLeft / 80) : Math.ceil(bRight / 80);
-	console.log("Row:" + row + ", Col:" + col);
-	var position ="box_" + (row * 10 + col);
-	//console.log(position);
-
-	var box = $(position);
-	if (box != null && box.style.visibility != "hidden") {
-		box.style.visibility = "hidden";
-		maxBoxNum--;
-		return true;
-	}
-	return false;
+function GameArea() {
+	this.createGameArea = BaseModel;
+	this.createGameArea(null, null, null, $("game_area"));
+	delete this.createGameArea;
 }
 
 function Ball() {
 	this.createBall = BaseModel;
-	this.createBall("div", null, "bound");
+	this.createBall("div", null, "bound", null);
 	delete this.createBall;
 }
 
 function Slid() {
 	this.createSlid = BaseModel;
-	this.createSlid("div", null, "slid");
+	this.createSlid("div", null, "slid", null);
 	delete this.createSlid;
 }
 
 function Brick(id) {
 	this.createBrick = BaseModel;
-	this.createBrick("span", "box", id);
+	this.createBrick("span", "box", id, null);
 	delete this.createBrick;
 	this.isInArea = function(bLeft, bRight, bTop, bBottom) {
 		console.log(bLeft + "" + bRight + "" + bTop + "" + bBottom);
@@ -152,8 +202,8 @@ function Brick(id) {
 	}
 }
 
-function BaseModel(labelName, className, idName) {
-	this.obj = document.createElement(labelName);
+function BaseModel(labelName, className, idName, tObj) {
+	this.obj = tObj == null ? document.createElement(labelName) : tObj;
 	if (className != null) {
 		this.obj.setAttribute("class", className);
 	}
@@ -197,31 +247,4 @@ function BaseModel(labelName, className, idName) {
 		this.obj.style.left = toX + "px";
 		this.obj.style.top = toY + "px";
 	}
-}
-
-window.onkeydown = function() {
-	var keyCode = event.keyCode - 38;
-	switch(keyCode) {
-		case -1:
-			left = true && isStart;
-			break;
-		case 1:
-			right = true && isStart;
-			break;
-	}
-	//console.log("down left:" + left + ", " + right);
-}
-
-window.onkeyup = function() {
-	var keyCode = event.keyCode - 38;
-
-	switch(keyCode) {
-		case -1:
-			left = false;
-			break;
-		case 1:
-			right = false;
-			break;
-	}
-	//console.log("up left:" + left + ", " + right);
 }

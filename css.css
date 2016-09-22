@@ -66,3 +66,10 @@ body{margin: 0; padding: 0;}
 	float: left;
 	margin-left: 45%;
 }
+.show {
+	height: 30px;
+	line-height: 30px;
+	color: #FFF;
+	display: inline-block;
+	margin-left: 20px;
+}
