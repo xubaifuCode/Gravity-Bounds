@@ -1,11 +1,4 @@
 body{margin: 0; padding: 0;}
-#real_result{
-	width: 820px;
-	height: 30px;
-	margin-left: auto;
-	margin-right: auto;
-	background-color: #033;
-}
 #game_area{
 	width: 820px;
 	height: 300px;
@@ -18,21 +11,7 @@ body{margin: 0; padding: 0;}
 	width: 820px;
 	height: 150px;
 }
-#show_something {
-	width: 400px;
-	height: 50px;
-	text-align: center;
-	margin-top: 50px;
-	float: left;
-	margin-left: 25%;
-}
-#hint_info {
-	font-size: 36px;
-	background-color: #033;
-	display: block;
-	color: #FFF;
-	margin-bottom: 20px;
-}
+
 .box{
 	width: 80px;
 	height: 15px;
@@ -47,7 +26,6 @@ body{margin: 0; padding: 0;}
 	position: absolute;
 	top: 320px;
 }
-
 #bound {
 	width: 20px;
 	height: 20px;
@@ -66,10 +44,32 @@ body{margin: 0; padding: 0;}
 	float: left;
 	margin-left: 45%;
 }
+#real_result{
+	width: 820px;
+	height: 30px;
+	margin-left: auto;
+	margin-right: auto;
+	background-color: #033;
+}
 .show {
 	height: 30px;
 	line-height: 30px;
 	color: #FFF;
 	display: inline-block;
 	margin-left: 20px;
+}
+#show_something {
+	width: 400px;
+	height: 50px;
+	text-align: center;
+	margin-top: 50px;
+	float: left;
+	margin-left: 25%;
+}
+#hint_info {
+	font-size: 36px;
+	background-color: #033;
+	display: block;
+	color: #FFF;
+	margin-bottom: 20px;
 }

@@ -196,10 +196,6 @@ function Brick(id) {
 	this.createBrick = BaseModel;
 	this.createBrick("span", "box", id, null);
 	delete this.createBrick;
-	this.isInArea = function(bLeft, bRight, bTop, bBottom) {
-		console.log(bLeft + "" + bRight + "" + bTop + "" + bBottom);
-		console.log(this.obj.id);
-	}
 }
 
 function BaseModel(labelName, className, idName, tObj) {
