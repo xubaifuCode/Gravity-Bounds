@@ -1,8 +1,15 @@
 body{margin: 0; padding: 0;}
+#real_result{
+	width: 820px;
+	height: 30px;
+	margin-left: auto;
+	margin-right: auto;
+	background-color: #033;
+}
 #game_area{
 	width: 820px;
 	height: 300px;
-	margin-top: 20px;
+	margin-top: 10px;
 	margin-left: auto;
 	margin-right: auto;
 	border: dashed thin #033;
@@ -11,16 +18,20 @@ body{margin: 0; padding: 0;}
 	width: 820px;
 	height: 150px;
 }
-#show_welcome {
+#show_something {
 	width: 400px;
 	height: 50px;
-	line-height: 50px;
-	font-size: 36px;
 	text-align: center;
-	margin-top: 100px;
-	background-color: #033;
+	margin-top: 50px;
 	float: left;
-	margin-left: 30%;
+	margin-left: 25%;
+}
+#hint_info {
+	font-size: 36px;
+	background-color: #033;
+	display: block;
+	color: #FFF;
+	margin-bottom: 20px;
 }
 .box{
 	width: 80px;
